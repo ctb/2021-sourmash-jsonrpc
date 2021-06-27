@@ -1,4 +1,10 @@
-from jsonrpcserver import method, serve
+"A simple JSON RPC server for serving sourmash databases."
+import sys
+import argparse
+
+import jsonrpcserver
+from jsonrpcserver import method
+
 import sourmash
 from sourmash.search import JaccardSearch, JaccardSearchBestOnly
 
@@ -56,26 +62,44 @@ class ServedIndex:
             retval.append(tup)
 
         return retval
-    
-test_db = sourmash.load_file_as_index('../sourmash/podar-ref.zip')
-test_db = test_db.select(ksize=31)
 
-db = ServedIndex(test_db)
+    def serve(self, port):
+        print(f'serving on localhost, port {port}')
+        jsonrpcserver.serve(port=port)
+
+
+### a bit hacky using global stuff, but will fix later.
+
+serve_db = None
 
 @method
 def select(**kwargs):
-    return db.select(**kwargs)
+    return serve_db.select(**kwargs)
 
 @method
 def find(database_id=0, search_type=None, best_only=False, threshold=0.0,
          query_ss_json=None):
-    return db.find(database_id, search_type, best_only, threshold,
+    return serve_db.find(database_id, search_type, best_only, threshold,
                    query_ss_json)
 
 @method
 def check_is_sourmash():
     return True
 
+def main():
+    p = argparse.ArgumentParser()
+    p.add_argument('-p', '--port', type=int, default=5000)
+    p.add_argument('database')
+    args = p.parse_args()
+
+    print(f"loading database '{args.database}'")
+    load_db = sourmash.load_file_as_index(args.database)
+
+    global serve_db
+    serve_db = ServedIndex(load_db)
+
+    serve_db.serve(port=args.port)
+
+
 if __name__ == "__main__":
-    print('serving on port 5000')
-    serve(port=5000)
+    sys.exit(main())
