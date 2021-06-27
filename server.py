@@ -21,9 +21,9 @@ class ServedIndex:
         db = self._get_database(database_id)
         return len(db)
 
-    def select(self, *, ksize=None):
+    def select(self, **kwargs):
         "select on a DB, return the index of the new db"
-        new_db = self.db.select(ksize=ksize)
+        new_db = self.db.select(**kwargs)
         self._serve_index += 1
         cur_idx = self._serve_index
         self._serving_dbs[cur_idx] = new_db
@@ -63,8 +63,8 @@ test_db = test_db.select(ksize=31)
 db = ServedIndex(test_db)
 
 @method
-def select(ksize=None):
-    return db.select(ksize=ksize)
+def select(**kwargs):
+    return db.select(**kwargs)
 
 @method
 def find(database_id=0, search_type=None, best_only=False, threshold=0.0,

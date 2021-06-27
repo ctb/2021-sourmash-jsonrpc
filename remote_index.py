@@ -63,10 +63,11 @@ class RemoteIndex(Index):
         return results
 
     def select(self, **kwargs):
-        # only support ksize for now, easy enough to add later
-        ksize = kwargs['ksize']
+        if 'picklist' in kwargs:
+            assert not kwargs.get('picklist'), "we do not support picklists for remote index yet"
+            del kwargs['picklist']
 
-        response = request(self.url, "select", ksize=ksize)
+        response = request(self.url, "select", **kwargs)
 
         database_id = response.data.result
         #print(f'got database_id={database_id}')
