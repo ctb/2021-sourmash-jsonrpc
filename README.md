@@ -50,3 +50,27 @@ similarity   match
 ----------   -----
 100.0%       CP001941.1 Aciduliprofundum boonei T469, complete genome
 ```
+
+## Notes
+
+
+### Some details
+
+* Over in
+  [PR #1644](https://github.com/sourmash-bio/sourmash/pull/1644), we
+  inject a "remote index" loader in sourmash_args. That's what handles the
+  http URL on the command line. Ugly, but works for now :).
+* The sourmash-server code can serve any sourmash database - so, SBT,
+  LCA, pathlist, zipfile, directory, or signature file. Use a pathlist
+  if you want to serve multiple indexes as a single database.
+  
+### Limitations:
+
+* Only the 'find' method works, so 'search' and 'gather' and 'prefetch' but
+  not much else.
+* Signature retrieval doesn't work, except with search.
+* Picklists do not yet work, either.
+* One big and invisible gotcha for 'gather' is that the prefetch stage is
+  done remotely, and then the gather is done locally. This is straightforward
+  to fix.
+* Only 50 results are returned at the moment.
